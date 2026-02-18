@@ -1,4 +1,4 @@
-package com.example.inangreji_flutter;
+package com.inangreji.app;
 
 import io.flutter.embedding.android.FlutterActivity;
 

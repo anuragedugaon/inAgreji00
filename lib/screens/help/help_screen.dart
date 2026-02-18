@@ -125,7 +125,7 @@ class HelpScreen extends StatefulWidget {
 
 class _HelpScreenState extends State<HelpScreen> {
   
-  static const String supportPhone = "+919876543210";
+  static const String supportPhone = "+919964030999";
 static const String supportEmail = "inangreji@gmail.com";
 
 Future<void> _callSupport() async {

@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:inangreji_flutter/provider/app_provider.dart';
 import 'package:inangreji_flutter/routes/app_routes.dart';
+import 'package:inangreji_flutter/services/api_client.dart';
+import 'package:inangreji_flutter/widgets/message_bubble.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -63,14 +67,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
             }),
  const SizedBox(height: 20),
 
-    _buildLogoutRow(() async {
-      print("Logout clicked!");
-  await clearAllPrefs();
+            _buildLogoutRow(() async {
+              print("Logout clicked!");
+              await clearAllPrefs();
 
+              // your logout logic:
+              Navigator.pushReplacementNamed(context, "/login");
+            }),
+            const SizedBox(height: 20),
 
-      // your logout logic:
-      Navigator.pushReplacementNamed(context, "/login");
-    }),
+            _buildDeleteAccountRow(() async {
+              final confirm = await _showDeleteConfirmDialog(context);
+              if (confirm != true) return;
+              await _deleteAccount(context);
+            }),
             const Spacer(),
             
 
@@ -89,9 +99,89 @@ class _SettingsScreenState extends State<SettingsScreen> {
   
   Future<void> clearAllPrefs() async {
   final prefs = await SharedPreferences.getInstance();
-  await prefs.remove("auth_token");
+  await prefs.clear();
   print("All SharedPreferences data cleared!");
 }
+
+  Future<bool?> _showDeleteConfirmDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          backgroundColor: kBackground,
+          title: const Text(
+            "Delete Account",
+            style: TextStyle(color: kAccent, fontWeight: FontWeight.bold),
+          ),
+          content: const Text(
+            "This will permanently delete your account. Are you sure?",
+            style: TextStyle(color: kText),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel", style: TextStyle(color: kText)),
+            ),
+            TextButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: const Text("Delete", style: TextStyle(color: Colors.redAccent)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<int?> _resolveUserId(BuildContext context) async {
+    final appProvider = context.read<AppProvider>();
+    final existingId = appProvider.userDetails.data?.id;
+    if (existingId != null) return existingId;
+
+    final details = await appProvider.getUserDetails();
+    return details.data?.id;
+  }
+
+  Future<void> _deleteAccount(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('auth_token');
+    if (token == null || token.isEmpty) {
+      showResultSnackBar(context, "Please login again.", false);
+      return;
+    }
+
+    final userId = await _resolveUserId(context);
+    if (userId == null) {
+      showResultSnackBar(context, "Unable to find user ID.", false);
+      return;
+    }
+
+    try {
+      showResultSnackBar(
+        context,
+        "Deleting account...",
+        true,
+        showIndicator: true,
+      );
+
+      final response = await ApiClient.postAiRequestWithAuth(
+        '/delete-account',
+        {'user_id': userId},
+        token,
+      );
+
+      final success = response['success'] == true;
+      final message = response['message'] ??
+          (success ? "Account deleted successfully." : "Delete failed.");
+      showResultSnackBar(context, message, success);
+
+      if (success) {
+        await clearAllPrefs();
+        Navigator.pushReplacementNamed(context, "/login");
+      }
+    } catch (e) {
+      showResultSnackBar(context, "Delete failed. Please try again.", false);
+    }
+  }
   /// ✅ Toggle Row Builder
   Widget _buildToggleRow(String label, bool value, Function(bool) onChanged) {
     return Row(
@@ -137,6 +227,30 @@ Widget _buildLogoutRow(VoidCallback onLogout) {
   );
 }
 
+Widget _buildDeleteAccountRow(VoidCallback onDelete) {
+  return Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      const Text(
+        "Delete Account",
+        style: TextStyle(color: Colors.redAccent, fontSize: 16),
+      ),
+
+      ElevatedButton(
+        onPressed: onDelete,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent,
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: const Text("Delete"),
+      ),
+    ],
+  );
+}
 
 
 }

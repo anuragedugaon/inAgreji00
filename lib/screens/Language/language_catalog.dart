@@ -16,6 +16,7 @@ class LanguageInfo {
 /// ✅ UI translation JSON available languages only
 /// (yahi codes appProvider.changeLanguage me use karna safe hai)
 const Set<String> kUiSupportedLanguageCodes = <String>{
+  'en', // English
   'hi', // Hindi
   'bn', // Bengali
   'ta', // Tamil
@@ -34,6 +35,8 @@ const Set<String> kUiSupportedLanguageCodes = <String>{
 
 /// ✅ Only Indian Languages (as per your requirement)
 const List<LanguageInfo> kWorldLanguages = <LanguageInfo>[
+    LanguageInfo(code: 'en', englishName: 'English', nativeName: 'English'),
+
   LanguageInfo(code: 'hi', englishName: 'Hindi', nativeName: 'हिन्दी'),
   LanguageInfo(code: 'bn', englishName: 'Bengali', nativeName: 'বাংলা'),
   LanguageInfo(code: 'ta', englishName: 'Tamil', nativeName: 'தமிழ்'),

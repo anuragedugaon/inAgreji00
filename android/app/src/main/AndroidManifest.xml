@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.inangreji_flutter">
+    package="com.inangreji.app">
+    
 
     <!-- ✅ Permissions for mic and network -->
     <uses-permission android:name="android.permission.INTERNET" />
@@ -11,7 +12,7 @@
 
     <application
         android:name="${applicationName}"
-        android:label="inangreji_flutter"
+        android:label="InAngreji"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true">
 

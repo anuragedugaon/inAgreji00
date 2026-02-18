@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:inangreji_flutter/routes/app_routes.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MenuScreen extends StatelessWidget {
   const MenuScreen({super.key});
+
+  Future<void> _launchExternalUrl(String url) async {
+    final uri = Uri.parse(url);
+    await launchUrl(uri, mode: LaunchMode.inAppWebView);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -77,21 +83,33 @@ class MenuScreen extends StatelessWidget {
                       "Wallet", Colors.teal,
                       routeName: AppRoutes.wallet),
 
-                      _buildMenuCard(
-  context,
-  Icons.privacy_tip,
-  "Privacy Policy",
-  Colors.cyan,
-  routeName: AppRoutes.privacyPolicy,
-),
+                  _buildMenuCard(
+                    context,
+                    Icons.privacy_tip,
+                    "Privacy Policy",
+                    Colors.cyan,
+                    onTap: () => _launchExternalUrl(
+                      "https://inangreji.in/privacy-policy",
+                    ),
+                  ),
 
-_buildMenuCard(
-  context,
-  Icons.description,
-  "Terms & Conditions",
-  Colors.orangeAccent,
-  routeName: AppRoutes.termsConditions,
-),
+                  _buildMenuCard(
+                    context,
+                    Icons.contact_support,
+                    "Contact Us",
+                    Colors.indigo,
+                    onTap: () => _launchExternalUrl(
+                      "https://inangreji.in/contact-us",
+                    ),
+                  ),
+
+                  _buildMenuCard(
+                    context,
+                    Icons.description,
+                    "Terms & Conditions",
+                    Colors.orangeAccent,
+                    routeName: AppRoutes.termsConditions,
+                  ),
 
                 ],
               ),
@@ -105,9 +123,13 @@ _buildMenuCard(
   /// Menu Card Builder with colored icon background
   Widget _buildMenuCard(
       BuildContext context, IconData icon, String label, Color backgroundColor,
-      {String? routeName}) {
+      {String? routeName, VoidCallback? onTap}) {
     return GestureDetector(
       onTap: () {
+        if (onTap != null) {
+          onTap();
+          return;
+        }
         if (routeName != null) {
           Navigator.pushReplacementNamed(context, routeName);
         }
